@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesbot Diagrams</title>
+<style>
+  :root {
+    --bg: #faf7ef;        /* warm off-white stage */
+    --panel: #ffffff;     /* sidebar */
+    --ink: #1f1d18;       /* near-black text */
+    --muted: #5f574a;     /* warm grey — darkened for readability */
+    --mint: #15a06b;      /* deep mint — readable accent on light */
+    --mint-soft: #3dd98f; /* brand mint — borders / swatches */
+    --tint: #ecfaf3;      /* active row tint */
+    --hover: #f4f1e8;     /* hover row */
+    --border: #e7e2d6;    /* warm light border */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { display: flex; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; }
+
+  /* ── Left menu ── */
+  #sidebar {
+    width: 264px; flex: 0 0 264px; height: 100%; overflow-y: auto;
+    background: var(--panel); border-right: 1px solid var(--border); padding: 18px 0 40px;
+    transition: width .18s ease, flex-basis .18s ease;
+  }
+  #sidebar h1 { font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--ink); padding: 0 18px 4px; }
+  #sidebar .sub { font-size: 10px; color: var(--muted); padding: 0 18px 16px; letter-spacing: 1px; }
+  .group { margin-top: 14px; }
+  .group > .ghead {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
+    color: var(--ink); padding: 9px 18px; border-top: 1px solid var(--border);
+  }
+  .group > .ghead:hover { color: var(--mint); }
+  .group > .ghead .arrow { font-size: 9px; color: var(--muted); transition: transform .15s ease; flex: 0 0 auto; }
+  .group.collapsed > .ghead .arrow { transform: rotate(-90deg); }
+  .group.collapsed a { display: none; }
+  .group a {
+    display: block; padding: 8px 18px 8px 26px; font-size: 12px; color: var(--ink);
+    text-decoration: none; border-left: 3px solid transparent;
+  }
+  .group a:hover { background: var(--hover); }
+  .group a.active { background: var(--tint); color: var(--mint); border-left-color: var(--mint-soft); }
+  .group a .note { display: block; font-size: 9px; color: var(--muted); letter-spacing: .5px; margin-top: 2px; }
+
+  /* ── Collapse toggle ── */
+  .shead { display: flex; align-items: center; justify-content: space-between; padding-right: 10px; }
+  #collapse-btn, #expand-btn {
+    background: var(--panel); color: var(--muted); border: 1px solid var(--border);
+    width: 26px; height: 26px; font-family: monospace; font-weight: bold; font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  }
+  #collapse-btn:hover, #expand-btn:hover { border-color: var(--mint-soft); color: var(--mint); background: var(--hover); }
+  body.collapsed #sidebar { display: none; }
+  #expand-btn { position: fixed; top: 10px; left: 10px; z-index: 20; display: none; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  body.collapsed #expand-btn { display: flex; }
+
+  /* ── Diagram pane ── */
+  #stage { flex: 1; height: 100%; position: relative; background: var(--bg); }
+  iframe { width: 100%; height: 100%; border: 0; display: block; }
+  #hint { position: absolute; top: 10px; left: 12px; font-size: 10px; color: #9a917f; letter-spacing: .5px; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="shead">
+    <h1>Salesbot Diagrams</h1>
+    <button id="collapse-btn" title="Collapse sidebar" aria-label="Collapse sidebar">&laquo;</button>
+  </div>
+  <div class="sub">build documentation · not a public asset</div>
+  <div id="menu"></div>
+</nav>
+
+<div id="stage">
+  <button id="expand-btn" title="Show sidebar" aria-label="Show sidebar">&raquo;</button>
+  <div id="hint">wheel = zoom · drag = pan · Shift+wheel = scroll · ⤢ fit</div>
+  <iframe id="viewer" name="viewer" title="diagram"></iframe>
+</div>
+
+<script>
+  // Add diagrams here as they are built — grouped by build stage / document.
+  // `src` is relative to this folder; SVGs and other folders work too.
+  const GROUPS = [
+    {
+      stage: 'V2 · Slice 1 — Tool-calling loop (PAI-9ji.2.1)',
+      items: [
+        { label: 'Process — step by step', note: 'sequential, grouped by file', src: 'salesbot-slice1-process.html' },
+        { label: 'Module map', note: 'file → functions', src: 'salesbot-slice1-modules.html' },
+        { label: 'Components (C4)', note: 'structure by container', src: 'salesbot-slice1-components.html' },
+        { label: 'Architecture (SVG)', note: 'all pieces, typed arrows', src: 'salesbot-slice1-architecture.svg' },
+      ],
+    },
+    // Example for the next slice (uncomment + add files when built):
+    // {
+    //   stage: 'V2 · Slice 2 — Persist + close (PAI-9ji.2.2)',
+    //   items: [ { label: '…', src: '…' } ],
+    // },
+  ];
+
+  const menu = document.getElementById('menu');
+  const viewer = document.getElementById('viewer');
+  let links = [];
+
+  // Re-fit once the framed diagram has fully loaded (the in-iframe auto-fit can
+  // run before the iframe reaches its final size, leaving the diagram tiny/off-
+  // centre). Same-origin, so we trigger the viewer's own fit button. Raw SVGs
+  // have no such button — the try/catch ignores them.
+  viewer.addEventListener('load', function () {
+    setTimeout(function () {
+      try {
+        const d = viewer.contentDocument;
+        const btn = d && d.getElementById('zoom-reset');
+        if (btn) btn.click();
+      } catch (e) {}
+    }, 150);
+  });
+
+  GROUPS.forEach(function (g) {
+    const wrap = document.createElement('div');
+    wrap.className = 'group';
+    const h = document.createElement('div');
+    h.className = 'ghead';
+    h.innerHTML = '<span class="arrow">&#9662;</span><span>' + g.stage + '</span>';
+    h.addEventListener('click', function () { wrap.classList.toggle('collapsed'); });
+    wrap.appendChild(h);
+    g.items.forEach(function (it) {
+      const a = document.createElement('a');
+      a.href = it.src;
+      a.target = 'viewer';
+      a.innerHTML = it.label + (it.note ? '<span class="note">' + it.note + '</span>' : '');
+      a.addEventListener('click', function () {
+        links.forEach(function (l) { l.classList.remove('active'); });
+        a.classList.add('active');
+      });
+      wrap.appendChild(a);
+      links.push(a);
+    });
+    menu.appendChild(wrap);
+  });
+
+  // Load the first diagram by default.
+  if (links.length) {
+    viewer.src = links[0].getAttribute('href');
+    links[0].classList.add('active');
+  }
+
+  // Sidebar collapse / expand (persisted across visits).
+  function setCollapsed(c) {
+    document.body.classList.toggle('collapsed', c);
+    try { localStorage.setItem('sb-collapsed', c ? '1' : '0'); } catch (e) {}
+  }
+  document.getElementById('collapse-btn').addEventListener('click', function () { setCollapsed(true); });
+  document.getElementById('expand-btn').addEventListener('click', function () { setCollapsed(false); });
+  try { if (localStorage.getItem('sb-collapsed') === '1') setCollapsed(true); } catch (e) {}
+</script>
+</body>
+</html>

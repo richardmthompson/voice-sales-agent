@@ -1,0 +1,278 @@
+<svg viewBox="0 0 1100 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --stroke: #2c1810;
+      --stroke-light: #564a42;
+      --accent: #b088c0;
+      --accent-dark: #8a60a8;
+      --bg: transparent;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --stroke: #E7DFD4;
+        --stroke-light: #A39789;
+        --accent: #b088c0;
+        --accent-dark: #8a60a8;
+      }
+    }
+    .node-rect { fill: none; stroke: var(--stroke); stroke-width: 1; }
+    .node-label { font-family: 'JetBrains Mono','SF Mono',monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; fill: var(--stroke); }
+    .node-sub { font-family: 'JetBrains Mono','SF Mono',monospace; font-size: 8.5px; letter-spacing: 0.01em; fill: var(--stroke-light); }
+    .icon { stroke: var(--stroke); fill: none; stroke-width: 1; }
+    .icon-dot { fill: var(--stroke); }
+    .title { font-family: system-ui,-apple-system,'Segoe UI',sans-serif; font-size: 24px; font-weight: 700; fill: var(--stroke); }
+    .subtitle { font-family: system-ui,-apple-system,'Segoe UI',sans-serif; font-size: 13px; fill: var(--stroke-light); }
+    .legend-label { font-family: system-ui,-apple-system,'Segoe UI',sans-serif; font-size: 12px; fill: var(--stroke-light); }
+    .edge-label { font-family: 'JetBrains Mono',monospace; font-size: 9px; fill: var(--stroke-light); }
+    .zone-label { font-family: system-ui,-apple-system,sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; fill: var(--stroke-light); opacity: 0.7; }
+    .conn-solid { stroke: var(--accent); stroke-width: 1; fill: none; }
+    .conn-dashed { stroke: var(--accent-dark); stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+    .conn-dotted { stroke: var(--stroke-light); stroke-width: 1; stroke-dasharray: 1 3; fill: none; }
+    .logo-tri { fill: none; stroke: var(--stroke); stroke-width: 14; stroke-linejoin: round; opacity: 0.85; }
+    .logo-text { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 700; letter-spacing: -0.3px; fill: var(--stroke); }
+    .tint-ext { fill: rgba(153,119,255,0.16); }
+    .tint-person { fill: rgba(98,246,181,0.20); }
+  </style>
+
+  <defs>
+    <marker id="as-end" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.5 L5,3 L0,5.5" fill="none" stroke="var(--accent)" stroke-width="1"/>
+    </marker>
+    <marker id="ad-end" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.5 L5,3 L0,5.5" fill="none" stroke="var(--accent-dark)" stroke-width="1"/>
+    </marker>
+    <marker id="at-end" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.5 L5,3 L0,5.5" fill="none" stroke="var(--stroke-light)" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <!-- ===== TITLE ===== -->
+  <text x="40" y="40" class="title">Salesbot Slice 1 — Gate-Driven Tool Calling</text>
+  <text x="40" y="62" class="subtitle">How one tool call becomes on-screen progress — every piece touched, and how they connect (PAI-9ji.2.1)</text>
+
+  <!-- ===== AR LABS MARK ===== -->
+  <g transform="translate(1000, 34) scale(0.05)">
+    <polygon points="-199.7,-82.7 -82.7,-199.7 -82.7,34.3" class="logo-tri"/>
+    <polygon points="-82.7,-199.7 82.7,-199.7 -82.7,-34.3" class="logo-tri"/>
+    <polygon points="82.7,-199.7 199.7,-82.7 -34.3,-82.7" class="logo-tri"/>
+    <polygon points="199.7,-82.7 199.7,82.7 34.3,-82.7" class="logo-tri"/>
+    <polygon points="199.7,82.7 82.7,199.7 82.7,-34.3" class="logo-tri"/>
+    <polygon points="82.7,199.7 -82.7,199.7 82.7,34.3" class="logo-tri"/>
+    <polygon points="-82.7,199.7 -199.7,82.7 34.3,82.7" class="logo-tri"/>
+    <polygon points="-199.7,82.7 -199.7,-82.7 -34.3,82.7" class="logo-tri"/>
+  </g>
+  <text x="1018" y="39" class="logo-text">AR.LABS</text>
+
+  <!-- ===== LEGEND ===== -->
+  <line x1="40" y1="88" x2="70" y2="88" class="conn-solid" marker-end="url(#as-end)"/>
+  <text x="80" y="92" class="legend-label">builds / derives (static structure)</text>
+  <line x1="320" y1="88" x2="350" y2="88" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <text x="360" y="92" class="legend-label">runtime flow (tool call → RTVI → rail)</text>
+  <line x1="660" y1="88" x2="690" y2="88" class="conn-dotted" marker-end="url(#at-end)"/>
+  <text x="700" y="92" class="legend-label">SSOT contract (gate-ids pinned across the wire)</text>
+
+  <!-- ===== ZONE LABELS ===== -->
+  <text x="40" y="128" class="zone-label">Backend · voice pipeline (Python)</text>
+  <text x="800" y="128" class="zone-label">Frontend · pipeline rail (React / TS)</text>
+
+  <!-- ============ CONNECTIONS (drawn first, under nodes) ============ -->
+
+  <!-- SOLID: build / derive chain -->
+  <line x1="147" y1="198" x2="147" y2="226" class="conn-solid" marker-end="url(#as-end)"/>
+  <line x1="147" y1="274" x2="147" y2="312" class="conn-solid" marker-end="url(#as-end)"/>
+  <line x1="147" y1="360" x2="147" y2="398" class="conn-solid" marker-end="url(#as-end)"/>
+  <line x1="740" y1="422" x2="800" y2="422" class="conn-solid" marker-end="url(#as-end)"/>
+  <text x="744" y="416" class="edge-label">stage→gate</text>
+
+  <!-- DASHED: runtime flow -->
+  <line x1="255" y1="422" x2="300" y2="422" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <text x="262" y="416" class="edge-label">runs</text>
+  <!-- LLM tool call loops back into the handler -->
+  <path d="M407,446 V508 H20 V336 H40" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <text x="120" y="503" class="edge-label">complete_&lt;gate&gt;() — the LLM calls the tool</text>
+  <!-- handler broadcasts -->
+  <line x1="255" y1="324" x2="560" y2="324" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <text x="300" y="318" class="edge-label">gate_complete (background — no audio wait)</text>
+  <line x1="740" y1="336" x2="800" y2="336" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <line x1="925" y1="360" x2="925" y2="398" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <text x="930" y="383" class="edge-label">applyServerMessage</text>
+  <line x1="925" y1="446" x2="925" y2="484" class="conn-dashed" marker-end="url(#ad-end)"/>
+  <text x="930" y="469" class="edge-label">computeStages</text>
+  <!-- rail surfaces to the prospect -->
+  <path d="M1050,508 H1075 V174 H1052" class="conn-dashed" marker-end="url(#ad-end)"/>
+
+  <!-- DOTTED: SSOT contract -->
+  <line x1="255" y1="174" x2="300" y2="174" class="conn-dotted" marker-end="url(#at-end)"/>
+  <text x="258" y="168" class="edge-label">reads</text>
+  <line x1="407" y1="198" x2="407" y2="226" class="conn-dotted" marker-end="url(#at-end)"/>
+  <text x="412" y="216" class="edge-label">generates</text>
+  <path d="M407,274 V290 H537 V422 H560" class="conn-dotted" marker-end="url(#at-end)"/>
+  <text x="430" y="286" class="edge-label">contract test pins gate-ids</text>
+
+  <!-- ============ NODES ============ -->
+
+  <!-- GATES (registry / SSOT) -->
+  <g transform="translate(40,150)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <ellipse cx="10" cy="4" rx="7" ry="2.2" class="icon"/>
+      <path d="M3,4 V16 a7,2.2 0 0 0 14,0 V4" class="icon"/>
+      <path d="M3,10 a7,2.2 0 0 0 14,0" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">GATES</text>
+    <text x="40" y="35" class="node-sub">tools.py · single source of truth</text>
+  </g>
+
+  <!-- RENDER PROMPT / SCHEMA -->
+  <g transform="translate(40,226)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">RENDER PROMPT / SCHEMA</text>
+    <text x="40" y="35" class="node-sub">tools.py · prompt + tool schema from GATES</text>
+  </g>
+
+  <!-- FLOW_NODES (factory + handler) -->
+  <g transform="translate(40,312)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">FLOW_NODES.PY</text>
+    <text x="40" y="35" class="node-sub">node factory + gate handler (validate→save)</text>
+  </g>
+
+  <!-- BOT.PY -->
+  <g transform="translate(40,398)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">BOT.PY</text>
+    <text x="40" y="35" class="node-sub">FlowManager + prose · assembles the flow</text>
+  </g>
+
+  <!-- LLM (external) -->
+  <g transform="translate(300,398)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect tint-ext"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="5" width="14" height="12" rx="2" class="icon"/>
+      <circle cx="7.5" cy="11" r="1.5" class="icon"/>
+      <circle cx="12.5" cy="11" r="1.5" class="icon"/>
+      <line x1="10" y1="2" x2="10" y2="5" class="icon" stroke-linecap="round"/>
+      <circle cx="10" cy="1.5" r="1" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">LLM</text>
+    <text x="40" y="35" class="node-sub">gpt-4o-mini · decides a gate is done</text>
+  </g>
+
+  <!-- EXPORT_GATES -->
+  <g transform="translate(300,150)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">EXPORT_GATES.PY</text>
+    <text x="40" y="35" class="node-sub">build-time generator</text>
+  </g>
+
+  <!-- CONTRACT.JSON -->
+  <g transform="translate(300,226)">
+    <rect x="0" y="0" width="215" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <ellipse cx="10" cy="4" rx="7" ry="2.2" class="icon"/>
+      <path d="M3,4 V16 a7,2.2 0 0 0 14,0 V4" class="icon"/>
+      <path d="M3,10 a7,2.2 0 0 0 14,0" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">GATES.CONTRACT.JSON</text>
+    <text x="40" y="35" class="node-sub">cross-boundary gate-id contract</text>
+  </g>
+
+  <!-- RTVI DATA CHANNEL (external) -->
+  <g transform="translate(560,312)">
+    <rect x="0" y="0" width="180" height="48" rx="3" class="node-rect tint-ext"/>
+    <g transform="translate(10,14)">
+      <rect x="2" y="4" width="16" height="11" rx="1" class="icon"/>
+      <path d="M2,5 L10,11 L18,5" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">RTVI CHANNEL</text>
+    <text x="40" y="35" class="node-sub">Daily data channel</text>
+  </g>
+
+  <!-- THEME.TS -->
+  <g transform="translate(560,398)">
+    <rect x="0" y="0" width="180" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">THEME.TS</text>
+    <text x="40" y="35" class="node-sub">PIPELINE_STAGES</text>
+  </g>
+
+  <!-- USEPIPELINESTAGE -->
+  <g transform="translate(800,312)">
+    <rect x="0" y="0" width="250" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">USEPIPELINESTAGE.TS</text>
+    <text x="40" y="35" class="node-sub">React hook · RTVI event wiring</text>
+  </g>
+
+  <!-- PIPELINE.TS -->
+  <g transform="translate(800,398)">
+    <rect x="0" y="0" width="250" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="3" y="1" width="14" height="18" rx="1.5" class="icon"/>
+      <line x1="6" y1="6" x2="14" y2="6" class="icon"/>
+      <line x1="6" y1="9.5" x2="14" y2="9.5" class="icon"/>
+      <line x1="6" y1="13" x2="11" y2="13" class="icon"/>
+    </g>
+    <text x="40" y="21" class="node-label">PIPELINE.TS</text>
+    <text x="40" y="35" class="node-sub">pure logic · applyServerMessage / computeStages</text>
+  </g>
+
+  <!-- PIPELINEPROGRESS / RAIL (UI) -->
+  <g transform="translate(800,484)">
+    <rect x="0" y="0" width="250" height="48" rx="3" class="node-rect"/>
+    <g transform="translate(10,14)">
+      <rect x="2" y="3" width="16" height="14" rx="1.5" class="icon"/>
+      <line x1="2" y1="7.5" x2="18" y2="7.5" class="icon"/>
+      <circle cx="4.5" cy="5.2" r="0.7" class="icon-dot"/>
+      <circle cx="6.8" cy="5.2" r="0.7" class="icon-dot"/>
+    </g>
+    <text x="40" y="21" class="node-label">PIPELINEPROGRESS</text>
+    <text x="40" y="35" class="node-sub">AppMinimal · the on-screen rail</text>
+  </g>
+
+  <!-- PROSPECT (person) -->
+  <g transform="translate(800,150)">
+    <rect x="0" y="0" width="250" height="48" rx="3" class="node-rect tint-person"/>
+    <g transform="translate(10,14)">
+      <circle cx="10" cy="5" r="3.5" class="icon"/>
+      <path d="M2,18 Q2,11 10,11 Q18,11 18,18" class="icon" stroke-linecap="round"/>
+    </g>
+    <text x="40" y="21" class="node-label">PROSPECT</text>
+    <text x="40" y="35" class="node-sub">browser · sees the rail advance</text>
+  </g>
+
+</svg>

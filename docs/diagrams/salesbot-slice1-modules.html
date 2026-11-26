@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesbot Slice 1 (PAI-9ji.2.1) — Module map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #fffce6; font-family: 'JetBrains Mono', monospace; }
+  #diagram-container { width: 100%; height: calc(100% - 36px); overflow: hidden; touch-action: none; cursor: grab; position: relative; }
+  #diagram-container:active { cursor: grabbing; }
+  .diagram-content { padding: 24px; display: inline-block; }
+  .mermaid { background: #fff; border: 4px solid #000; padding: 24px; display: inline-block; }
+  .legend { margin-top: 16px; border: 4px solid #000; padding: 12px; background: #fff; display: inline-block; }
+  .legend .items { display: flex; gap: 20px; flex-wrap: wrap; }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend .swatch { width: 20px; height: 20px; border: 2px solid #000; }
+  .legend span { font-family: monospace; font-size: 12px; }
+  #controls { position: fixed; bottom: 48px; right: 12px; display: flex; gap: 4px; z-index: 10; }
+  #controls button { width: 32px; height: 32px; background: #ffffff; color: #1f1d18; border: 1px solid #cfc8b6; font-family: monospace; font-weight: bold; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #controls button:hover { background: #3dd98f; color: #000; border-color: #3dd98f; }
+  #title-bar { height: 36px; background: #ffffff; display: flex; align-items: center; justify-content: center; border-top: 1px solid #e7e2d6; }
+  #title-bar span { color: #8a8275; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div id="diagram-container">
+  <div class="diagram-content" id="content">
+    <pre class="mermaid" id="diagram">
+flowchart TB
+  classDef fn fill:#62f6b5,stroke:#000000,color:#000000,stroke-width:1px;
+  classDef data fill:#ffdd03,stroke:#000000,color:#000000,stroke-width:1px;
+  classDef ext fill:#9977ff,stroke:#000000,color:#ffffff,stroke-width:1px;
+
+  subgraph T["tools.py"]
+    GATES["GATES — SSOT registry (dict)"]:::data
+    RP["render_prompt(gate_id)"]:::fn
+    RS["render_schema(gate_id)"]:::fn
+  end
+  subgraph FN["flow_nodes.py"]
+    MGN["make_gate_node(gate_id, next, role?, preamble?)"]:::fn
+    MH["make_handler(gate_id, next) — validate, save, return, background"]:::fn
+    EMIT["_emit_gate_complete() · _send_rtvi · _persist_findings (stub)"]:::fn
+    MCN["make_closing_node(prompt)"]:::fn
+  end
+  subgraph BT["bot.py"]
+    PROSE["ROLE_MESSAGE · GREETING / GAP preambles · CLOSING_PROMPT"]:::data
+    FAC["node factories: build_initial_node to project_discovery to closing"]:::fn
+    RUN["run_bot() — pipeline + FlowManager + on_client_ready / on_client_disconnected"]:::fn
+  end
+  subgraph EG["export_gates.py"]
+    EXP["export()"]:::fn
+    CJSON["gates.contract.json (generated)"]:::data
+  end
+  LLM["LLM · gpt-4o-mini (external)"]:::ext
+  subgraph HK["frontend/hooks/usePipelineStage.ts"]
+    HOOK["usePipelineStage() — subscribes to RTVI events"]:::fn
+  end
+  subgraph TH["frontend/lib/theme.ts"]
+    STAGES["PIPELINE_STAGES (stage to gateId)"]:::data
+  end
+  subgraph PL["frontend/lib/pipeline.ts"]
+    ASM["applyServerMessage(state, msg)"]:::fn
+    CS["computeStages(state)"]:::fn
+  end
+  subgraph UI["frontend/components/PipelineProgress.tsx"]
+    RAIL["PipelineProgress / AppMinimal — renders the rail"]:::fn
+  end
+
+  GATES --> RP
+  GATES --> RS
+  RP --> MGN
+  RS --> MGN
+  MGN --> MH
+  MH --> EMIT
+  PROSE --> FAC
+  MGN --> FAC
+  MCN --> FAC
+  FAC --> RUN
+  GATES --> EXP
+  EXP --> CJSON
+  CJSON -->|"pins gate-ids"| STAGES
+  RUN -->|"drives"| LLM
+  LLM -->|"calls the tool"| MH
+  EMIT -->|"RTVI gate_complete"| HOOK
+  HOOK --> ASM
+  STAGES --> ASM
+  ASM --> CS
+  CS --> RAIL
+    </pre>
+    <div class="legend">
+      <div class="items">
+        <div class="item"><div class="swatch" style="background:#62f6b5;"></div><span>Function / module code</span></div>
+        <div class="item"><div class="swatch" style="background:#ffdd03;"></div><span>Data / SSOT artifact</span></div>
+        <div class="item"><div class="swatch" style="background:#9977ff;"></div><span>External system</span></div>
+        <div class="item"><span>Box = one file · arrow = flow / dependency</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="zoom-in" title="Zoom in">+</button>
+  <button id="zoom-out" title="Zoom out">&minus;</button>
+  <button id="zoom-reset" title="Fit to view">&#8634;</button>
+</div>
+
+<div id="title-bar"><span>Salesbot Slice 1 · Module map — file to functions (PAI-9ji.2.1)</span></div>
+
+<!-- Mermaid: local single-file UMD build (gitignored — large; re-fetch per .gitignore). Not a public-site asset. -->
+<script src="./mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true, theme: 'base',
+    themeVariables: { primaryColor: '#62f6b5', primaryTextColor: '#000000', primaryBorderColor: '#000000', lineColor: '#000000', secondaryColor: '#ffdd03', tertiaryColor: '#9977ff', clusterBkg: '#f5f5f5', clusterBorder: '#000000', fontSize: '14px', fontFamily: 'JetBrains Mono, monospace' },
+    flowchart: { htmlLabels: true, curve: 'basis', padding: 20, nodeSpacing: 50, rankSpacing: 80 }
+  });
+</script>
+<script src="./panzoom.min.js"></script>
+<script src="./diagram-viewer.js"></script>
+<script>
+  DiagramViewer.init({ containerId: 'diagram-container', contentId: 'content', zoomInId: 'zoom-in', zoomOutId: 'zoom-out', zoomResetId: 'zoom-reset' });
+</script>
+</body>
+</html>
